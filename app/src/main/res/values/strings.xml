@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">IoT Demo</string>
+
+    <string name="hello_world"></string>
+    <string name="fetch_button_name">Fetch</string>
+    <string name="action_settings">Settings</string>
+</resources>
