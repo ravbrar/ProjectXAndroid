@@ -33,171 +33,104 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class MainActivity extends Activity {
-    private Button fetchButton;
-    private Button machineOn;
-    private Button machineOff;
-    private TextView textView;
+public class MainActivity extends Activity
+{
+    private TextView battery_voltage_text;
+    private TextView load_current_text;
+    private TextView security_switch_text;
+    private TextView solar_voltage_text;
+    private TextView time_text;
+
+    private TextView battery_voltage_value_text;
+    private TextView load_current_value_text;
+    private TextView security_switch_value_text;
+    private TextView solar_voltage_value_text;
+    private TextView time_value_text;
+
     private Firebase ref;
-    private Firebase refAtStart;
-    private ImageView motorView;
+    private ImageView batteryView;
     private DataSnapshot currentSnapshot;
-    boolean toggleFlag = false;
-    private SmsManager smsManager;
-
-
-
-
-
-
-    private static final Random RANDOM = new Random();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         Firebase.setAndroidContext(this);
         setContentView(R.layout.activity_main);
-        System.out.println("Fetch Button Clicked\n");
         ref = new Firebase("https://bottling-station-firebase.firebaseio.com/");
 
-        fetchButton = (Button) findViewById(R.id.fetch_button);
-        machineOn = (Button) findViewById(R.id.machine_on);
-        machineOff = (Button) findViewById(R.id.machine_off);
+        battery_voltage_text = (TextView) findViewById(R.id.battery_voltage_view);
+        load_current_text = (TextView) findViewById(R.id.load_current_view);
+        security_switch_text = (TextView) findViewById(R.id.security_switch_view);
+        solar_voltage_text = (TextView) findViewById(R.id.solar_voltage_view);
+        time_text = (TextView) findViewById(R.id.time_view);
 
-        textView = (TextView) findViewById(R.id.rpm_view);
-        motorView = (ImageView) findViewById(R.id.motor_view);
+        battery_voltage_value_text = (TextView) findViewById(R.id.battery_voltage_value_view);
+        load_current_value_text = (TextView) findViewById(R.id.load_current_value_view);
+        security_switch_value_text = (TextView) findViewById(R.id.security_switch_value_view);
+        solar_voltage_value_text = (TextView) findViewById(R.id.solar_voltage_value_view);
+        time_value_text = (TextView) findViewById(R.id.time_value_view);
 
-        smsManager = SmsManager.getDefault();
+        batteryView = (ImageView) findViewById(R.id.battery_view);
 
-
-
-
-        machineOn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                ref.child("machine_status").setValue("ON");
-                //Log.d("My App: ", "ON Button Clicked\n");
-                System.out.println("ON Button Clicked\n");
-
-                smsManager.sendTextMessage("+64210328301", null, "1", null, null);// william - +640211879860  // iot - +642102307205
-                Toast.makeText(MainActivity.this, "ON Button Clicked ", Toast.LENGTH_SHORT).show();
-
-            }
-        });
-
-        machineOff.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                ref.child("machine_status").setValue("OFF");
-                System.out.println("OFF Button Clicked\n");
-
-                smsManager.sendTextMessage("+64210328301", null, "0", null, null);
-                Toast.makeText(MainActivity.this, "OFF Button Clicked ", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        ref.child("stages/stage1").addValueEventListener(new ValueEventListener() {
-
+        ref.child("locations/location_x/parameters").addValueEventListener(new ValueEventListener()
+        {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void onDataChange(DataSnapshot snapshot)
+            {
                 currentSnapshot = snapshot;
-                readStage1();
-
-                if (toggleFlag){
-                    updateAnalytics(readStage1());
-                }
-
-                toggleFlag = true;
+                readParameters();
             }
 
             @Override
-            public void onCancelled(FirebaseError error) {
+            public void onCancelled(FirebaseError error)
+            {
                 System.out.println(error.getMessage());
             }
 
         });
-
-        fetchButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                System.out.println("Fetch Button Clicked\n");
-            }
-        });
     }
 
-
-    private void updateAnalytics (Map<String, String> dataToUpdate) {
-
-        String a = (String) dataToUpdate.get("time");
-        String b = (String) dataToUpdate.get("status");
-
-
-        Map<String, String> updateFirebase = new HashMap<String, String>();
-        updateFirebase.put("status", b.toString());
-        updateFirebase.put("time", a.toString());
-        ref.child("analytics").push().setValue(updateFirebase);
-    }
-
-    private Map<String, String> readStage1 (){
+    private Map<String, String> readParameters()
+    {
         Map<Object, Object> map = (Map<Object, Object>) currentSnapshot.getValue();
-        Object a = (Object) map.get("time");
-        Object b = (Object) map.get("status");
-        System.out.println(b.toString() + " -- " + a.toString() + "\n");
+        Object a = (Object) map.get("battery_voltage");
+        Object b = (Object) map.get("load_current");
+        Object c = (Object) map.get("security_switch");
+        Object d = (Object) map.get("solar_voltage");
+        Object e = (Object) map.get("time");
 
-//                        50(20%) 2000-3000
-//                        64(25%)5000-6000
-//                        77(30%) 6400-7200
-
-        Integer rpmValue = 0;
-        try {
-            rpmValue = Integer.parseInt(b.toString());
-        } catch (NumberFormatException e) {
-            rpmValue = 0;
-            e.printStackTrace();
-        }
-        String rpmDisplay = b.toString();
-        int duration;
-//        if ((rpmValue >= 2000) && (rpmValue <= 3000)) {
-//            duration = 5000;
-//        } else if ((rpmValue >= 5000) && (rpmValue <= 6000)) {
-//            duration = 1500;
-//        } else if ((rpmValue >= 6400) && (rpmValue <= 7200)) {
-//            duration = 500;
-//        }
-        if ((rpmValue > 0) ) {
-            duration = 500;
-        } else {
-            rpmDisplay = "fault";
-            duration = 0;
-
-        }
-        textView.setText("RPM: " + rpmDisplay + "\n");
-        Animation rotation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, .5f,
-                Animation.RELATIVE_TO_SELF, .5f);
-        rotation.setInterpolator(new LinearInterpolator());
-        rotation.setRepeatCount(Animation.INFINITE);
-        rotation.setDuration(duration);
-
-        motorView.startAnimation(rotation);
-        System.out.println("Duration: " + duration + "\n");
+        battery_voltage_value_text.setText(a.toString());
+        load_current_value_text.setText(b.toString());
+        security_switch_value_text.setText(c.toString());
+        solar_voltage_value_text.setText(d.toString());
+        time_value_text.setText(e.toString());
 
         Map<String, String> returnMap = new HashMap<String, String>();
-        returnMap.put("status", rpmDisplay);
-        returnMap.put("time", a.toString());
+        returnMap.put("battery_voltage", a.toString());
+        returnMap.put("load_current", b.toString());
+        returnMap.put("security_switch",c.toString());
+        returnMap.put("solar_voltage",d.toString());
+        returnMap.put("time", e.toString());
         return returnMap;
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_settings)
+        {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 }
