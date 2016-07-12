@@ -1,6 +1,7 @@
 package com.example.rav.part4projectv1;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
 import android.renderscript.Sampler;
@@ -47,7 +48,7 @@ public class MainActivity extends Activity {
 
 
 
-// android branch testing
+
 
 
     private static final Random RANDOM = new Random();
@@ -59,8 +60,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         System.out.println("Fetch Button Clicked\n");
         ref = new Firebase("https://bottling-station-firebase.firebaseio.com/");
-
-        fetchButton = (Button) findViewById(R.id.fetch_button);
+               fetchButton = (Button) findViewById(R.id.fetch_button);
         machineOn = (Button) findViewById(R.id.machine_on);
         machineOff = (Button) findViewById(R.id.machine_off);
 
@@ -74,11 +74,13 @@ public class MainActivity extends Activity {
 
         machineOn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                ref.child("machine_status").setValue("ON");
+                ref.child("locations/location_x/parameters/battery_voltage").setValue("ON");
                 //Log.d("My App: ", "ON Button Clicked\n");
                 System.out.println("ON Button Clicked\n");
+                //ref.push();
 
-                smsManager.sendTextMessage("+64210328301", null, "1", null, null);// william - +640211879860  // iot - +642102307205
+//                Firebase.ServerValue.TIMESTAMP
+           //     smsManager.sendTextMessage("+64210328301", null, "1", null, null);// william - +640211879860  // iot - +642102307205
                 Toast.makeText(MainActivity.this, "ON Button Clicked ", Toast.LENGTH_SHORT).show();
 
             }
@@ -118,11 +120,18 @@ public class MainActivity extends Activity {
         fetchButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 System.out.println("Fetch Button Clicked\n");
+                sendMessage(v);
+
+
             }
         });
     }
 
+    public void sendMessage(View view) {
+        Intent intent = new Intent(this, LocationsGMap.class);
+        startActivity(intent);
 
+    }
     private void updateAnalytics (Map<String, String> dataToUpdate) {
 
         String a = (String) dataToUpdate.get("time");
