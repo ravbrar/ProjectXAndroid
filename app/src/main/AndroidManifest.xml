@@ -43,14 +43,6 @@
                 android:value="com.example.rav.part4projectv1.MainActivity" />
         </activity>
         <activity
-            android:name=".DispalyParameters"
-            android:label="@string/title_activity_dispaly_parameters"
-            android:parentActivityName=".LocationsGMap" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.rav.part4projectv1.LocationsGMap" />
-        </activity>
-        <activity
             android:name=".DisplayParameters"
             android:label="@string/title_activity_display_parameters"
             android:parentActivityName=".LocationsGMap" >
