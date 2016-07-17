@@ -72,21 +72,20 @@ public class DisplayParameters extends Activity
         time_value_text = (TextView) findViewById(R.id.time_value_view);
 
         batteryView = (ImageView) findViewById(R.id.battery_view);
+       // orderByKey()
+        ref.child("locations/location_x/parameters").orderByChild("time").limitToLast(1).addValueEventListener(new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot snapshot) {
+            currentSnapshot = snapshot;
+            System.out.println("snaphots ");
+            System.out.println("xx" + currentSnapshot.getValue().toString());
+            readParameters();
+        }
 
-        ref.child("locations/location_x/parameters").addValueEventListener(new ValueEventListener()
-        {
-            @Override
-            public void onDataChange(DataSnapshot snapshot)
-            {
-                currentSnapshot = snapshot;
-                readParameters();
-            }
-
-            @Override
-            public void onCancelled(FirebaseError error)
-            {
-                System.out.println(error.getMessage());
-            }
+        @Override
+        public void onCancelled(FirebaseError error) {
+            System.out.println(error.getMessage());
+        }
 
         });
     }
