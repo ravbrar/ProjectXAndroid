@@ -62,7 +62,7 @@ package com.example.rav.part4projectv1;
     String voltage ="test";
     String uniqueKey;
     String previousKey;
-    String[] coordinatesKey = new String[10];
+    public String[] coordinatesKey = new String[10];
     Integer i=0;
     Integer j=0;
     boolean mapReady = false;
@@ -113,9 +113,10 @@ package com.example.rav.part4projectv1;
                         coordinatesVoltage.child(value).orderByChild("time").limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot snapshot) {
+
                                 currentSnapshot = snapshot;
                                 System.out.println("snapshots ");
-                      
+
                                 System.out.println("xxabcd" + snapshot.getValue().toString());
 
                                 Map<Object, Object> voltageMap = (Map<Object, Object>) currentSnapshot.getValue();
@@ -133,7 +134,7 @@ package com.example.rav.part4projectv1;
                                 if (previousKey == uniqueKey) {
                                     // do nothing
                                 } else {
-                                    Object a = (Object) voltageMap.get(uniqueKey);
+                                    Object a = (Object) voltageMap.get(uniqueKey); // contains latest values for a given sign
                                     System.out.println("xxxsdxxVoltage" + a.toString());
                                     Map<Object, Object> voltageInfo = (Map<Object, Object>) a;
                                     Object b = (Object) voltageInfo.get("battery_voltage");
@@ -193,7 +194,7 @@ package com.example.rav.part4projectv1;
                                         Bitmap bhalfsize = Bitmap.createScaledBitmap(largeIcon, largeIcon.getWidth() / 10, largeIcon.getHeight() / 10, false);
                                         map2.addMarker(new MarkerOptions()
                                                         .position(new LatLng(latMap, longMap))
-                                                        .title("Title")
+                                                        .title(value)
                                                         .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize))
                                         );
                                     }
@@ -310,15 +311,34 @@ package com.example.rav.part4projectv1;
 
                 @Override
                 public boolean onMarkerClick(Marker arg0) {
-                    if (arg0 != null && arg0.getTitle().equals("Sign1"))
-                        ; // if marker  source is clicked
-                    Toast.makeText(LocationsGMap.this, "SIGN CLICKED", Toast.LENGTH_SHORT).show();// display toast
-                    Intent intent = new Intent(LocationsGMap.this, DisplayParameters.class);
-                    startActivity(intent);
+                    System.out.println("xxxxxcoordinates54678 marker clicked at: " + arg0.getPosition().toString());
+                    String SignCoordinate = contains(arg0.getPosition().toString());
+                    if (arg0 != null && (SignCoordinate  != "null")) {
 
-                    return true;
+                        Toast.makeText(LocationsGMap.this, "SIGN CLICKED", Toast.LENGTH_SHORT).show();// display toast
+                        Intent intent = new Intent(LocationsGMap.this, DisplayParameters.class);
+                        intent.putExtra("SignCoordinates", SignCoordinate);
+                        startActivity(intent);
+                    }
+                        return true;
+
                 }
 
             });
         }
+    public  String contains(String item) {
+        for (String n : coordinatesKey) {
+            String clickedCoordinate = "lat/lng: ("+n+")";
+            System.out.println("xxxxxcoordinates54678 item " + item );
+            System.out.println("xxxxxcoordinates54678    n " + clickedCoordinate);
+
+            if (clickedCoordinate.equals(item)) {
+
+                System.out.println("xxxxxcoordinates54678 returning true" );
+                return n;
+            }
+        }
+        System.out.println("xxxxxcoordinates54678 returning false" );
+        return "null";
+    }
     }
