@@ -45,10 +45,20 @@
         <activity
             android:name=".DisplayParameters"
             android:label="@string/title_activity_display_parameters"
-            android:parentActivityName=".LocationsGMap" >
+            android:parentActivityName=".LocationsGMap"
+            android:theme="@style/Theme.AppCompat" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.rav.part4projectv1.LocationsGMap" />
+        </activity>
+        <activity
+            android:name=".GraphPlotter"
+            android:label="@string/title_activity_graph_plotter"
+            android:parentActivityName=".DisplayParameters"
+            android:theme="@style/Theme.AppCompat" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.rav.part4projectv1.DisplayParameters" />
         </activity>
     </application>
 

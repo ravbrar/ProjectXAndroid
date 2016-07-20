@@ -67,7 +67,7 @@ public class MainActivity extends Activity {
     }
 
     public void sendMessage(View view) {
-        Intent intent = new Intent(this, LocationsGMap.class);
+        Intent intent = new Intent(this, GraphPlotter.class); // change this back to LocationsGMap.class
         startActivity(intent);
 
     }

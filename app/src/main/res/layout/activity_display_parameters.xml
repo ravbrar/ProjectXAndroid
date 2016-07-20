@@ -17,7 +17,13 @@
         android:adjustViewBounds="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true" />
-
+    <Button
+        android:id="@+id/voltage_chart"
+        android:text="Histroy"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_below="@+id/time_view"
+        android:layout_toEndOf="@+id/battery_voltage_view" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
