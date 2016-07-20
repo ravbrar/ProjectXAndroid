@@ -1,13 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.rav.part4projectv1" >
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="com.example.googlemaps.permission.MAPS_RECEIVE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <permission
+        android:name="com.example.rav.part4projectv1.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyD7wroeh2Eo0gKQ_9FiYbn4BfNs4Ykw_m0" />
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" >
@@ -16,6 +32,23 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".LocationsGMap"
+            android:label="@string/title_activity_locations_gmap"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.AppCompat" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.rav.part4projectv1.MainActivity" />
+        </activity>
+        <activity
+            android:name=".DisplayParameters"
+            android:label="@string/title_activity_display_parameters"
+            android:parentActivityName=".LocationsGMap" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.rav.part4projectv1.LocationsGMap" />
         </activity>
     </application>
 
