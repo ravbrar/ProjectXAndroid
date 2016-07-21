@@ -14,6 +14,7 @@ import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,7 +38,8 @@ import java.util.Random;
 public class MainActivity extends Activity {
     private Button fetchButton;
 
-
+    private EditText userNameEntry;
+    private  String noOfGraphEntries;
 
 
 
@@ -50,16 +52,23 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
                fetchButton = (Button) findViewById(R.id.fetch_button);
+        userNameEntry = (EditText) findViewById(R.id.username);
 
-
-
+        userNameEntry.setText("10");
 
 
 
         fetchButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 System.out.println("Fetch Button Clicked\n");
-                sendMessage(v);
+                if (isInteger(userNameEntry.getText().toString())) {
+                    noOfGraphEntries = userNameEntry.getText().toString();
+                    sendMessage(v);
+                }else{
+                    Toast.makeText(MainActivity.this, "Please Enter a Valid Number", Toast.LENGTH_SHORT).show();// display toast
+                }
+
+
 
 
             }
@@ -67,7 +76,9 @@ public class MainActivity extends Activity {
     }
 
     public void sendMessage(View view) {
-        Intent intent = new Intent(this, GraphPlotter.class); // change this back to LocationsGMap.class
+        Intent intent = new Intent(MainActivity.this, GraphPlotter.class); // change this back to LocationsGMap.class
+        System.out.println("noOfGraphEntries" + noOfGraphEntries);
+        intent.putExtra("noOfGraphEntries", noOfGraphEntries);
         startActivity(intent);
 
     }
@@ -87,5 +98,20 @@ public class MainActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+    public static boolean isInteger(String s) {
+        return isInteger(s,10);
+    }
+
+    public static boolean isInteger(String s, int radix) {
+        if(s.isEmpty()) return false;
+        for(int i = 0; i < s.length(); i++) {
+            if(i == 0 && s.charAt(i) == '-') {
+                if(s.length() == 1) return false;
+                else continue;
+            }
+            if(Character.digit(s.charAt(i),radix) < 0) return false;
+        }
+        return true;
     }
 }
