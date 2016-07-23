@@ -30,10 +30,19 @@ package com.example.rav.part4projectv1;
         import com.google.android.gms.maps.model.BitmapDescriptorFactory;
         import com.google.android.gms.maps.model.LatLng;
         import com.google.android.gms.maps.model.MarkerOptions;
+        import com.jjoe64.graphview.GraphView;
+        import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
+        import com.jjoe64.graphview.series.DataPoint;
+        import com.jjoe64.graphview.series.DataPointInterface;
+        import com.jjoe64.graphview.series.LineGraphSeries;
+        import com.jjoe64.graphview.series.OnDataPointTapListener;
+        import com.jjoe64.graphview.series.Series;
 
 
         import org.json.JSONObject;
 
+        import java.text.ParseException;
+        import java.text.SimpleDateFormat;
         import java.util.Calendar;
         import java.util.Date;
         import java.util.HashMap;
@@ -41,6 +50,7 @@ package com.example.rav.part4projectv1;
         import java.util.Map;
         import java.util.Objects;
         import java.util.Random;
+        import java.util.TimeZone;
 
 public class DisplayParameters extends Activity
 {
@@ -58,6 +68,16 @@ public class DisplayParameters extends Activity
     String parametersLocation = "https://bottling-station-firebase.firebaseio.com/locations/";
     Bitmap bhalfsize;
     Map<Object, Object> voltageMap;
+    String graphURL;
+    GraphView graph;
+    String noOfGraphEntries;
+    LineGraphSeries<DataPoint> series;
+    Date datePoint;
+    Calendar calendar;
+    Float voltageValues;
+    String voltageTimes;
+    boolean graphToExecute =  false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -74,6 +94,7 @@ public class DisplayParameters extends Activity
             }
         });
 
+        calendar = Calendar.getInstance();
         String SignCoordinates;
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
@@ -118,6 +139,8 @@ public class DisplayParameters extends Activity
                     System.out.println("xxxxxxcoordvaluekey " + key);
                     parametersLocation = parametersLocation.concat(key);
                     System.out.println("xxxxxxcoordvalueQuery " + parametersLocation);
+                    graphURL = parametersLocation;
+
                 }
 
                 Firebase getCurrentParamers = new Firebase(parametersLocation);
@@ -162,6 +185,8 @@ public class DisplayParameters extends Activity
                         security_switch_text.append(voltageMap.get("security_switch").toString());
                         solar_voltage_text.append(voltageMap.get("solar_voltage").toString());
                         time_text.append(voltageMap.get("time").toString());
+                        updateGraph();
+
                     }
 
                     @Override
@@ -169,6 +194,7 @@ public class DisplayParameters extends Activity
                         System.out.println(error.getMessage());
                     }
                 });
+
             }
 
             @Override
@@ -177,8 +203,122 @@ public class DisplayParameters extends Activity
             }
 
         });
+//        if (graphToExecute == true){
+//            updateGraph();
+//        }
+//    updateGraph();
     }
 
+    public void updateGraph(){
+        graph = (GraphView) findViewById(R.id.graph_display_parameters);
+        if (noOfGraphEntries == null){
+            noOfGraphEntries = "10";
+        }
+        noOfGraphEntries = "10";
+        series = new LineGraphSeries<DataPoint>(new DataPoint[]{});
+//        series = new LineGraphSeries<DataPoint>(new DataPoint[]{
+//                new DataPoint(d1, 1),
+//                new DataPoint(d2, 5.01),
+//                new DataPoint(d3, 3),
+//                new DataPoint(d5, 2)
+//        });
+        graph.addSeries(series);
+        graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(DisplayParameters.this));
+
+        // graph.getGridLabelRenderer().setNumHorizontalLabels(3);
+        graph.getViewport().setMinX(0);
+        graph.getViewport().setMaxX(146000);
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);
+        series.setDataPointsRadius(15);
+
+        series.setDrawDataPoints(true);
+        graph.getGridLabelRenderer().setHumanRounding(false);
+        graph.getGridLabelRenderer().setPadding(50);
+
+        graph.getGridLabelRenderer().setVerticalAxisTitle("Volts");
+        graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
+        graph.setTitle("Battery Voltage");
+        graph.getLegendRenderer().setVisible(true);
+        graph.getViewport().setScrollable(true);
+        graph.getViewport().setScalable(true);
+
+
+        Firebase ref1 = new Firebase("https://bottling-station-firebase.firebaseio.com/locations/location_z/parameters"); //graphURL
+        Query queryRef1 = ref1.orderByChild("time").limitToLast(Integer.parseInt(noOfGraphEntries));
+        queryRef1.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot nextSnapshot, String s) {
+                System.out.println("xxabcdsnapshotCUrrent new" + nextSnapshot.getValue().toString());
+                System.out.println("snapshots ");
+                System.out.println("xxabcdsnapshotCUrrent" + nextSnapshot.getValue().toString());
+                Map<Object, Object> voltageMap1 = (Map<Object, Object>) nextSnapshot.getValue();
+                System.out.println("asdfgBatteryVoltage" + voltageMap1.get("battery_voltage").toString());
+//                        System.out.println("asdfgload_current" + voltageMap.get("load_current").toString());
+//                        System.out.println("asdfgsecurity_switch" + voltageMap.get("security_switch").toString());
+//                        System.out.println("asdfgsolar_voltage" + voltageMap.get("solar_voltage").toString());
+//                        System.out.println("asdfgtime" + voltageMap.get("time").toString());
+                voltageValues = Float.parseFloat(voltageMap1.get("battery_voltage").toString());
+                voltageTimes = voltageMap1.get("time").toString();
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss"); // MM/dd/yyyy HH:mm:ss
+                try {
+                    datePoint = simpleDateFormat.parse(voltageTimes);
+                    // System.out.println("date : "+simpleDateFormat.format(d5));
+                } catch (ParseException ex) {
+                    System.out.println("Exception " + ex);
+                }
+                System.out.println("absdatePoint:  " + datePoint);
+                System.out.println("absvoltageValues " + voltageValues);
+//                calendar.add(Calendar.DATE, 1);
+//                Date d10 = calendar.getTime();
+//                System.out.println("absd3 " + d10);
+
+                series.appendData(new DataPoint(datePoint, voltageValues), true, 100);
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshotx, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                System.out.println("firebaseError" + firebaseError);
+            }
+        });
+
+        series.setOnDataPointTapListener(new OnDataPointTapListener() {
+            @Override
+            public void onTap(Series series, DataPointInterface dataPoint) {
+
+                System.out.println("dataPoint: " + dataPoint.getX());
+                long l = (new Double(dataPoint.getX())).longValue();
+
+                Date dateClicked = new Date(l); // *1000 is to convert seconds to milliseconds
+                SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss"); // the format of your date
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC+12:00")); // give a timezone reference for formating (see comment at the bottom
+                String formattedDate = sdf.format(dateClicked);
+//                System.out.println(formattedDate);
+                double voltageDataPoint = dataPoint.getY();
+                String toastVoltage = String.format("%.2f ", voltageDataPoint);
+
+                System.out.println("dataPointVoltage: " + toastVoltage);
+                Toast.makeText(DisplayParameters.this, "Captured @: " + formattedDate + "\n " + " Battery Voltage: " + toastVoltage + " Volts", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
     public void sendMessage(View view) {
         Intent intent = new Intent(this, GraphPlotter.class);
         System.out.println("asdfg12Intent " + parametersLocation);

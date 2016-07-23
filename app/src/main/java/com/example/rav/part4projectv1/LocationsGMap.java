@@ -191,7 +191,7 @@ package com.example.rav.part4projectv1;
 
                                         }
 
-                                        Bitmap bhalfsize = Bitmap.createScaledBitmap(largeIcon, largeIcon.getWidth() / 10, largeIcon.getHeight() / 10, false);
+                                        Bitmap bhalfsize = Bitmap.createScaledBitmap(largeIcon, largeIcon.getWidth() / 3, largeIcon.getHeight() / 3, false);
                                         map2.addMarker(new MarkerOptions()
                                                         .position(new LatLng(latMap, longMap))
                                                         .title(value)
