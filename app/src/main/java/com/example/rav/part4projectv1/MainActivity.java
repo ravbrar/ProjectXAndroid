@@ -49,7 +49,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-               fetchButton = (Button) findViewById(R.id.fetch_button);
+        fetchButton = (Button) findViewById(R.id.fetch_button);
 
 
 

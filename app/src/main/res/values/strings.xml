@@ -8,4 +8,5 @@
     <string name="title_activity_locations_gmap">LocationsGMap</string>
     <string name="title_activity_dispaly_parameters">DispalyParameters</string>
     <string name="title_activity_display_parameters">DisplayParameters</string>
+    <string name="title_activity_graph_plotter">GraphPlotter</string>
 </resources>

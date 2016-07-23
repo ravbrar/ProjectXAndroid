@@ -26,7 +26,8 @@
 
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -37,7 +38,8 @@
             android:name=".LocationsGMap"
             android:label="@string/title_activity_locations_gmap"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/Theme.AppCompat" >
+            android:theme="@style/Theme.AppCompat"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.rav.part4projectv1.MainActivity" />
@@ -45,10 +47,20 @@
         <activity
             android:name=".DisplayParameters"
             android:label="@string/title_activity_display_parameters"
-            android:parentActivityName=".LocationsGMap" >
+            android:parentActivityName=".LocationsGMap"
+            android:theme="@style/Theme.AppCompat" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.rav.part4projectv1.LocationsGMap" />
+        </activity>
+        <activity
+            android:name=".GraphPlotter"
+            android:label="@string/title_activity_graph_plotter"
+            android:parentActivityName=".DisplayParameters"
+            android:theme="@style/Theme.AppCompat" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.rav.part4projectv1.DisplayParameters" />
         </activity>
     </application>
 
