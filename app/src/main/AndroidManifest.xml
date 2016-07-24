@@ -38,7 +38,7 @@
             android:name=".LocationsGMap"
             android:label="@string/title_activity_locations_gmap"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/Theme.AppCompat"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -48,7 +48,7 @@
             android:name=".DisplayParameters"
             android:label="@string/title_activity_display_parameters"
             android:parentActivityName=".LocationsGMap"
-            android:theme="@style/Theme.AppCompat" >
+            android:theme="@style/Theme.AppCompat.NoActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.rav.part4projectv1.LocationsGMap" />

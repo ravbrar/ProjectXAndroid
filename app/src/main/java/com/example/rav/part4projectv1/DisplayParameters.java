@@ -1,22 +1,34 @@
 package com.example.rav.part4projectv1;
 
         import android.app.Activity;
+        import android.content.Context;
         import android.content.Intent;
+        import android.content.pm.ActivityInfo;
         import android.graphics.Bitmap;
         import android.graphics.BitmapFactory;
+        import android.graphics.Typeface;
         import android.os.Bundle;
         import android.os.Message;
         import android.renderscript.Sampler;
         import android.telephony.SmsManager;
+        import android.text.Editable;
+        import android.text.Html;
+        import android.text.TextWatcher;
         import android.util.Log;
+        import android.view.KeyEvent;
         import android.view.Menu;
         import android.view.MenuItem;
         import android.view.View;
         import android.view.animation.Animation;
         import android.view.animation.LinearInterpolator;
         import android.view.animation.RotateAnimation;
+        import android.view.inputmethod.EditorInfo;
+        import android.view.inputmethod.InputMethodManager;
+        import android.widget.ArrayAdapter;
         import android.widget.Button;
+        import android.widget.EditText;
         import android.widget.ImageView;
+        import android.widget.Spinner;
         import android.widget.TextView;
         import android.widget.Toast;
 
@@ -59,8 +71,9 @@ public class DisplayParameters extends Activity
     private TextView security_switch_text;
     private TextView solar_voltage_text;
     private TextView time_text;
-    private Button historyButton;
-
+    private Button fullScreenButton;
+    private EditText graphDataAmount;
+    Firebase ref1;
     private Firebase ref;
     private ImageView batteryView;
     private DataSnapshot currentSnapshot;
@@ -77,6 +90,7 @@ public class DisplayParameters extends Activity
     Float voltageValues;
     String voltageTimes;
     boolean graphToExecute =  false;
+    String SignCoordinates;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -84,18 +98,81 @@ public class DisplayParameters extends Activity
         super.onCreate(savedInstanceState);
         Firebase.setAndroidContext(this);
         setContentView(R.layout.activity_display_parameters);
+        Spinner spinner = (Spinner) findViewById(R.id.parameters_select);
+// Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.spinner_array, android.R.layout.simple_spinner_item);
+// Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+// Apply the adapter to the spinner
+        spinner.setAdapter(adapter);
+        graphDataAmount = (EditText) findViewById(R.id.no_of_days);
+        fullScreenButton = (Button) findViewById(R.id.full_screen);
+        graph = (GraphView) findViewById(R.id.graph_display_parameters);
 
-        historyButton = (Button) findViewById(R.id.voltage_chart);
-        historyButton.setOnClickListener(new View.OnClickListener() {
+        series = new LineGraphSeries<DataPoint>(new DataPoint[]{});
+//        series = new LineGraphSeries<DataPoint>(new DataPoint[]{
+//                new DataPoint(d1, 1),
+//                new DataPoint(d2, 5.01),
+//                new DataPoint(d3, 3),
+//                new DataPoint(d5, 2)
+//        });
+        graph.addSeries(series);
+        graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(DisplayParameters.this));
+
+        // graph.getGridLabelRenderer().setNumHorizontalLabels(3);
+        graph.getViewport().setMinX(0);
+        graph.getViewport().setMaxX(146000);
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);
+        series.setDataPointsRadius(15);
+
+        series.setDrawDataPoints(true);
+        graph.getGridLabelRenderer().setHumanRounding(false);
+        graph.getGridLabelRenderer().setPadding(50);
+
+        graph.getGridLabelRenderer().setVerticalAxisTitle("Volts");
+        graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
+//        graph.setTitle("Battery Voltage");
+//        graph.getLegendRenderer().setVisible(true);
+        graph.getViewport().setScrollable(true);
+        graph.getViewport().setScalable(true);
+
+
+        graphDataAmount.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_SEND) {
+                    System.out.println("Enter was pressed");
+                    if (isInteger(graphDataAmount.getText().toString())) {
+                        InputMethodManager imm = (InputMethodManager)getBaseContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(graphDataAmount.getWindowToken(), 0);
+                        noOfGraphEntries = graphDataAmount.getText().toString();
+                        System.out.println("noOfGraphEntries12: "+noOfGraphEntries);
+                        series.resetData(new DataPoint[]{});
+                        updateGraph();
+                    } else {
+                        noOfGraphEntries = "10";
+                        Toast.makeText(DisplayParameters.this, "Enter a Valid Number", Toast.LENGTH_SHORT).show();// display toast
+                    }
+                    handled = true;
+                }
+                return handled;
+            }
+        });
+
+
+        fullScreenButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                System.out.println("History Button Clicked\n");
-                sendMessage(v);
+                System.out.println("fullScreenButton Clicked\n");
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
             }
         });
 
         calendar = Calendar.getInstance();
-        String SignCoordinates;
+
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if(extras == null) {
@@ -104,7 +181,10 @@ public class DisplayParameters extends Activity
                 SignCoordinates= extras.getString("SignCoordinates");
             }
         } else {
-            SignCoordinates= (String) savedInstanceState.getSerializable("SignCoordinates");
+            //SignCoordinates= (String) savedInstanceState.getSerializable("SignCoordinates");
+
+            CharSequence savedText = savedInstanceState.getCharSequence("sign_coordinates_value");
+            SignCoordinates = savedText.toString();
         }
         System.out.println("SignCoordinates "  + SignCoordinates);//PrbolemHereWHenComingBckFromGraphPlotter
 
@@ -114,6 +194,13 @@ public class DisplayParameters extends Activity
         security_switch_text = (TextView) findViewById(R.id.security_switch_view);
         solar_voltage_text = (TextView) findViewById(R.id.solar_voltage_view);
         time_text = (TextView) findViewById(R.id.time_view);
+
+//        battery_voltage_text.setText(Html.fromHtml("<b>Battery Voltage:  </b>"));
+//        load_current_text.setText(Html.fromHtml("<b>Load Current:  </b>"));
+//        security_switch_text.setText(Html.fromHtml("<b>Security Switch:  </b>"));
+//        solar_voltage_text.setText(Html.fromHtml("<b>Solar Voltage:  </b>"));
+//        time_text.setText(Html.fromHtml("<b>Time:  </b>"));
+
 
         batteryView = (ImageView) findViewById(R.id.battery_view);
                 ref = new Firebase("https://bottling-station-firebase.firebaseio.com/locations");
@@ -180,12 +267,21 @@ public class DisplayParameters extends Activity
                         }
                         bhalfsize = Bitmap.createScaledBitmap(largeIcon, largeIcon.getWidth() / 1, largeIcon.getHeight() / 1, false);
                         batteryView.setImageBitmap(bhalfsize);
-                        battery_voltage_text.append(voltageMap.get("battery_voltage").toString());
-                        load_current_text.append(voltageMap.get("load_current").toString());
-                        security_switch_text.append(voltageMap.get("security_switch").toString());
-                        solar_voltage_text.append(voltageMap.get("solar_voltage").toString());
-                        time_text.append(voltageMap.get("time").toString());
+//                        battery_voltage_text.append(Html.fromHtml("<p>" + voltageMap.get("battery_voltage").toString() + "</p>"));
+                       battery_voltage_text.append("  " + voltageMap.get("battery_voltage").toString());
+                        load_current_text.append("  " + voltageMap.get("load_current").toString());
+                        security_switch_text.append("  " + voltageMap.get("security_switch").toString());
+                        solar_voltage_text.append("  " + voltageMap.get("solar_voltage").toString());
+                        time_text.append("  " + voltageMap.get("time").toString());
+                        System.out.println("graphURL:  " + graphURL);
+                        ref1 = new Firebase(graphURL+"/parameters"); //graphURL
+                        if (noOfGraphEntries != null){
+                            noOfGraphEntries = "1";
+                        }
+
                         updateGraph();
+
+
 
                     }
 
@@ -209,42 +305,90 @@ public class DisplayParameters extends Activity
 //    updateGraph();
     }
 
+
+    public void sendMessage(View view) {
+        Intent intent = new Intent(this, GraphPlotter.class);
+        System.out.println("asdfg12Intent " + parametersLocation);
+        intent.putExtra("parametersLocation", parametersLocation);
+        Toast.makeText(DisplayParameters.this, "Button  CLICKED", Toast.LENGTH_SHORT).show();// display toast
+        startActivity(intent);
+    }
+
+    private Map<String, String> readParameters()
+    {
+        Map<Object, Object> map = (Map<Object, Object>) currentSnapshot.getValue();
+        Object a = (Object) map.get("battery_voltage");
+        Object b = (Object) map.get("load_current");
+        Object c = (Object) map.get("security_switch");
+        Object d = (Object) map.get("solar_voltage");
+        Object e = (Object) map.get("time");
+
+        Map<String, String> returnMap = new HashMap<String, String>();
+        returnMap.put("battery_voltage", a.toString());
+        returnMap.put("load_current", b.toString());
+        returnMap.put("security_switch", c.toString());
+        returnMap.put("solar_voltage", d.toString());
+        returnMap.put("time", e.toString());
+        return returnMap;
+    }
+
+    @Override
+    protected void onSaveInstanceState (Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putCharSequence("sign_coordinates_value", SignCoordinates);
+    }
+    @Override
+    public void onRestart(){
+        super.onRestart();
+        // put your code here...
+        batteryView.setImageBitmap(bhalfsize);
+        battery_voltage_text.setText("Battery Voltage: " + voltageMap.get("battery_voltage").toString());
+        load_current_text.setText("Load Current: " + voltageMap.get("load_current").toString());
+        security_switch_text.setText("Security Switch: " + voltageMap.get("security_switch").toString());
+        solar_voltage_text.setText("Solar Voltage: " + voltageMap.get("solar_voltage").toString());
+        time_text.setText("Time: " + voltageMap.get("time").toString());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        int id = item.getItemId();
+        if (id == R.id.action_settings)
+        {
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    public static boolean isInteger(String s) {
+        return isInteger(s, 10);
+    }
+    public static boolean isInteger(String s, int radix) {
+        if(s.isEmpty()) return false;
+        for(int i = 0; i < s.length(); i++) {
+            if(i == 0 && s.charAt(i) == '-') {
+                if(s.length() == 1) return false;
+                else continue;
+            }
+            if(Character.digit(s.charAt(i),radix) < 0) return false;
+        }
+        return true;
+    }
     public void updateGraph(){
-        graph = (GraphView) findViewById(R.id.graph_display_parameters);
+
         if (noOfGraphEntries == null){
             noOfGraphEntries = "10";
         }
-        noOfGraphEntries = "10";
-        series = new LineGraphSeries<DataPoint>(new DataPoint[]{});
-//        series = new LineGraphSeries<DataPoint>(new DataPoint[]{
-//                new DataPoint(d1, 1),
-//                new DataPoint(d2, 5.01),
-//                new DataPoint(d3, 3),
-//                new DataPoint(d5, 2)
-//        });
-        graph.addSeries(series);
-        graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(DisplayParameters.this));
 
-        // graph.getGridLabelRenderer().setNumHorizontalLabels(3);
-        graph.getViewport().setMinX(0);
-        graph.getViewport().setMaxX(146000);
-        graph.getViewport().setXAxisBoundsManual(true);
-        graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);
-        series.setDataPointsRadius(15);
+        System.out.println("noOfGraphEntries:  " +noOfGraphEntries.toString());
 
-        series.setDrawDataPoints(true);
-        graph.getGridLabelRenderer().setHumanRounding(false);
-        graph.getGridLabelRenderer().setPadding(50);
-
-        graph.getGridLabelRenderer().setVerticalAxisTitle("Volts");
-        graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
-        graph.setTitle("Battery Voltage");
-        graph.getLegendRenderer().setVisible(true);
-        graph.getViewport().setScrollable(true);
-        graph.getViewport().setScalable(true);
-
-
-        Firebase ref1 = new Firebase("https://bottling-station-firebase.firebaseio.com/locations/location_z/parameters"); //graphURL
         Query queryRef1 = ref1.orderByChild("time").limitToLast(Integer.parseInt(noOfGraphEntries));
         queryRef1.addChildEventListener(new ChildEventListener() {
             @Override
@@ -319,61 +463,4 @@ public class DisplayParameters extends Activity
         });
 
     }
-    public void sendMessage(View view) {
-        Intent intent = new Intent(this, GraphPlotter.class);
-        System.out.println("asdfg12Intent " + parametersLocation);
-        intent.putExtra("parametersLocation", parametersLocation);
-        Toast.makeText(DisplayParameters.this, "Button  CLICKED", Toast.LENGTH_SHORT).show();// display toast
-        startActivity(intent);
-    }
-
-    private Map<String, String> readParameters()
-    {
-        Map<Object, Object> map = (Map<Object, Object>) currentSnapshot.getValue();
-        Object a = (Object) map.get("battery_voltage");
-        Object b = (Object) map.get("load_current");
-        Object c = (Object) map.get("security_switch");
-        Object d = (Object) map.get("solar_voltage");
-        Object e = (Object) map.get("time");
-
-        Map<String, String> returnMap = new HashMap<String, String>();
-        returnMap.put("battery_voltage", a.toString());
-        returnMap.put("load_current", b.toString());
-        returnMap.put("security_switch", c.toString());
-        returnMap.put("solar_voltage", d.toString());
-        returnMap.put("time", e.toString());
-        return returnMap;
-    }
-
-    @Override
-    public void onRestart(){
-        super.onRestart();
-        // put your code here...
-        batteryView.setImageBitmap(bhalfsize);
-        battery_voltage_text.setText("Battery Voltage: " + voltageMap.get("battery_voltage").toString());
-        load_current_text.setText("Load Current: " + voltageMap.get("load_current").toString());
-        security_switch_text.setText("Security Switch: " + voltageMap.get("security_switch").toString());
-        solar_voltage_text.setText("Solar Voltage: " + voltageMap.get("solar_voltage").toString());
-        time_text.setText("Time: " +voltageMap.get("time").toString());
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        int id = item.getItemId();
-        if (id == R.id.action_settings)
-        {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
 }

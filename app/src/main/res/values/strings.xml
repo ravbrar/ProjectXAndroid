@@ -9,4 +9,10 @@
     <string name="title_activity_dispaly_parameters">DispalyParameters</string>
     <string name="title_activity_display_parameters">DisplayParameters</string>
     <string name="title_activity_graph_plotter">GraphPlotter</string>
+    <string-array name="spinner_array">
+        <item>Battery Voltage</item>
+        <item>Solar Voltage</item>
+        <item>Load Current</item>
+        <item>Security Switch</item>
+    </string-array>
 </resources>

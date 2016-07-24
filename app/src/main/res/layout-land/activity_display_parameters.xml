@@ -14,22 +14,21 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 
-
     <Spinner
         android:id="@+id/parameters_select"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-
+        android:layout_marginStart="282dp"
         android:layout_alignTop="@+id/graph_display_parameters"
-        android:layout_alignEnd="@+id/graph_display_parameters"
-        android:layout_marginEnd="161dp" />
+        android:layout_toEndOf="@+id/battery_voltage_view" />
     <Button
         android:id="@+id/full_screen"
         android:text="Full Screen"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_below="@+id/graph_display_parameters"
-        android:layout_alignParentStart="true" />
+        android:layout_alignTop="@+id/parameters_select"
+        android:layout_alignParentStart="true"
+        android:visibility="gone" />
     <ImageView
         android:id="@+id/battery_view"
         android:background="@android:color/transparent"
@@ -44,10 +43,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Name: "
+        android:text="Name:   "
         android:id="@+id/sign_name_view"
-        android:layout_below="@+id/full_screen"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/voltage_chart" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -56,67 +55,62 @@
         android:id="@+id/sign_region_view"
         android:layout_below="@+id/sign_name_view"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="5dp"/>
+        android:layout_marginTop="5dp"
+        android:visibility="gone" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Battery Voltage: "
+        android:text="Battery Voltage:   "
         android:id="@+id/battery_voltage_view"
-        android:layout_marginTop="49dp"
-        android:layout_below="@+id/sign_region_view"
-        android:layout_alignParentStart="true" />
+        android:layout_alignBottom="@+id/graph_display_parameters"
+        android:layout_alignStart="@+id/graph_display_parameters" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Load Current: "
+        android:text="Load Current:   "
         android:id="@+id/load_current_view"
         android:layout_below="@+id/solar_voltage_view"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="5dp" />
+        android:layout_toEndOf="@+id/voltage_chart" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Secuirty Switch: "
+        android:text="Secuirty Switch:   "
         android:id="@+id/security_switch_view"
         android:layout_below="@+id/load_current_view"
-        android:layout_alignParentStart="true"
-        android:layout_alignEnd="@+id/battery_voltage_view"
-        android:layout_marginTop="5dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Solar Voltage: "
-        android:layout_alignParentStart="true"
-        android:id="@+id/solar_voltage_view"
-        android:layout_below="@+id/battery_voltage_view"
-        android:layout_alignStart="@+id/security_switch_view"
-        android:layout_marginTop="5dp"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Time: "
-        android:id="@+id/time_view"
-        android:layout_marginTop="5dp"
-        android:layout_below="@+id/security_switch_view"
         android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Solar Voltage:   "
+        android:id="@+id/solar_voltage_view"
+        android:layout_below="@+id/graph_display_parameters"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Time:   "
+        android:id="@+id/time_view"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/security_switch_view" />
     <EditText
         android:id="@+id/no_of_days"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:hint=" Graph Data (# days)"
         android:inputType="number"
-        android:imeOptions="actionSend"
-        android:layout_marginEnd="135dp"
-        android:layout_below="@+id/sign_region_view"
-        android:layout_alignEnd="@+id/graph_display_parameters" />
+        android:layout_marginStart="234dp"
+        android:layout_above="@+id/security_switch_view"
+        android:layout_toEndOf="@+id/security_switch_view"
+        android:imeOptions="actionSend"/>
+
 
 </RelativeLayout>
