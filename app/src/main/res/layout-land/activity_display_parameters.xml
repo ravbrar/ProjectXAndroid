@@ -18,9 +18,8 @@
         android:id="@+id/parameters_select"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="282dp"
         android:layout_alignTop="@+id/graph_display_parameters"
-        android:layout_toEndOf="@+id/battery_voltage_view" />
+        android:layout_alignStart="@+id/no_of_days" />
     <Button
         android:id="@+id/full_screen"
         android:text="Full Screen"

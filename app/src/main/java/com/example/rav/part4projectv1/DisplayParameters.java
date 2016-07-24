@@ -24,11 +24,13 @@ package com.example.rav.part4projectv1;
         import android.view.animation.RotateAnimation;
         import android.view.inputmethod.EditorInfo;
         import android.view.inputmethod.InputMethodManager;
+        import android.widget.AdapterView;
         import android.widget.ArrayAdapter;
         import android.widget.Button;
         import android.widget.EditText;
         import android.widget.ImageView;
         import android.widget.Spinner;
+        import android.widget.Switch;
         import android.widget.TextView;
         import android.widget.Toast;
 
@@ -91,6 +93,9 @@ public class DisplayParameters extends Activity
     String voltageTimes;
     boolean graphToExecute =  false;
     String SignCoordinates;
+    Spinner selectedOption;
+    String RequiredGraph;
+    boolean spinnerEnable = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -98,14 +103,38 @@ public class DisplayParameters extends Activity
         super.onCreate(savedInstanceState);
         Firebase.setAndroidContext(this);
         setContentView(R.layout.activity_display_parameters);
-        Spinner spinner = (Spinner) findViewById(R.id.parameters_select);
+        selectedOption = (Spinner) findViewById(R.id.parameters_select);
 // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.spinner_array, android.R.layout.simple_spinner_item);
 // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 // Apply the adapter to the spinner
-        spinner.setAdapter(adapter);
+        selectedOption.setAdapter(adapter);
+
+
+        selectedOption.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                // your code here
+                RequiredGraph = selectedOption.getSelectedItem().toString();
+                System.out.println("RequiredGraph: " + RequiredGraph);
+                if (spinnerEnable){
+                    series.resetData(new DataPoint[]{});
+                    updateGraph();
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+            }
+
+        });
+
+
+
         graphDataAmount = (EditText) findViewById(R.id.no_of_days);
         fullScreenButton = (Button) findViewById(R.id.full_screen);
         graph = (GraphView) findViewById(R.id.graph_display_parameters);
@@ -272,13 +301,29 @@ public class DisplayParameters extends Activity
                         load_current_text.append("  " + voltageMap.get("load_current").toString());
                         security_switch_text.append("  " + voltageMap.get("security_switch").toString());
                         solar_voltage_text.append("  " + voltageMap.get("solar_voltage").toString());
-                        time_text.append("  " + voltageMap.get("time").toString());
+                        Date formattedTime = null;
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss"); // MM/dd/yyyy HH:mm:ss
+                        try {
+                            formattedTime = simpleDateFormat.parse(voltageMap.get("time").toString());
+                            // System.out.println("date : "+simpleDateFormat.format(d5));
+                        } catch (ParseException ex) {
+                            System.out.println("Exception " + ex);
+                        }
+
+
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy   HH:mm:ss"); // the format of your date
+                        sdf.setTimeZone(TimeZone.getTimeZone("GMT+12:00")); // give a timezone reference for formating (see comment at the bottom
+                        String formattedDate = sdf.format(formattedTime);
+                        System.out.println("Recent Time: " + formattedDate);
+
+                        time_text.append("  " + formattedDate);
+
                         System.out.println("graphURL:  " + graphURL);
                         ref1 = new Firebase(graphURL+"/parameters"); //graphURL
                         if (noOfGraphEntries != null){
                             noOfGraphEntries = "1";
                         }
-
+                        spinnerEnable = true;
                         updateGraph();
 
 
@@ -306,13 +351,6 @@ public class DisplayParameters extends Activity
     }
 
 
-    public void sendMessage(View view) {
-        Intent intent = new Intent(this, GraphPlotter.class);
-        System.out.println("asdfg12Intent " + parametersLocation);
-        intent.putExtra("parametersLocation", parametersLocation);
-        Toast.makeText(DisplayParameters.this, "Button  CLICKED", Toast.LENGTH_SHORT).show();// display toast
-        startActivity(intent);
-    }
 
     private Map<String, String> readParameters()
     {
@@ -346,6 +384,8 @@ public class DisplayParameters extends Activity
         load_current_text.setText("Load Current: " + voltageMap.get("load_current").toString());
         security_switch_text.setText("Security Switch: " + voltageMap.get("security_switch").toString());
         solar_voltage_text.setText("Solar Voltage: " + voltageMap.get("solar_voltage").toString());
+
+
         time_text.setText("Time: " + voltageMap.get("time").toString());
     }
 
@@ -387,7 +427,7 @@ public class DisplayParameters extends Activity
             noOfGraphEntries = "10";
         }
 
-        System.out.println("noOfGraphEntries:  " +noOfGraphEntries.toString());
+        System.out.println("noOfGraphEntries:  " + noOfGraphEntries.toString());
 
         Query queryRef1 = ref1.orderByChild("time").limitToLast(Integer.parseInt(noOfGraphEntries));
         queryRef1.addChildEventListener(new ChildEventListener() {
@@ -397,12 +437,21 @@ public class DisplayParameters extends Activity
                 System.out.println("snapshots ");
                 System.out.println("xxabcdsnapshotCUrrent" + nextSnapshot.getValue().toString());
                 Map<Object, Object> voltageMap1 = (Map<Object, Object>) nextSnapshot.getValue();
-                System.out.println("asdfgBatteryVoltage" + voltageMap1.get("battery_voltage").toString());
+                String parameterType;
+                switch (RequiredGraph){
+                    case "Battery Voltage": parameterType = "battery_voltage"; break;
+                    case "Solar Voltage": parameterType = "solar_voltage"; break;
+                    case "Load Current": parameterType = "load_current"; break;
+                    case "Security Switch": parameterType = "security_switch"; break;
+                    default: parameterType = "battery_voltage"; break;
+
+                }
+                System.out.println("asdfgBatteryVoltage" + voltageMap1.get(parameterType).toString());
 //                        System.out.println("asdfgload_current" + voltageMap.get("load_current").toString());
 //                        System.out.println("asdfgsecurity_switch" + voltageMap.get("security_switch").toString());
 //                        System.out.println("asdfgsolar_voltage" + voltageMap.get("solar_voltage").toString());
 //                        System.out.println("asdfgtime" + voltageMap.get("time").toString());
-                voltageValues = Float.parseFloat(voltageMap1.get("battery_voltage").toString());
+                voltageValues = Float.parseFloat(voltageMap1.get(parameterType).toString());
                 voltageTimes = voltageMap1.get("time").toString();
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss"); // MM/dd/yyyy HH:mm:ss
                 try {
@@ -451,7 +500,7 @@ public class DisplayParameters extends Activity
 
                 Date dateClicked = new Date(l); // *1000 is to convert seconds to milliseconds
                 SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss"); // the format of your date
-                sdf.setTimeZone(TimeZone.getTimeZone("UTC+12:00")); // give a timezone reference for formating (see comment at the bottom
+                sdf.setTimeZone(TimeZone.getTimeZone("GMT+12:00")); // give a timezone reference for formating (see comment at the bottom
                 String formattedDate = sdf.format(dateClicked);
 //                System.out.println(formattedDate);
                 double voltageDataPoint = dataPoint.getY();
