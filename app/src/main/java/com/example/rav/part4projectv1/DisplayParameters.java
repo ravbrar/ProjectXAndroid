@@ -73,8 +73,10 @@ public class DisplayParameters extends Activity
     private TextView security_switch_text;
     private TextView solar_voltage_text;
     private TextView time_text;
+    private TextView signNameTextView;
+    private TextView signRegionTextView;
     private Button fullScreenButton;
-    private EditText graphDataAmount;
+     EditText graphDataAmount;
     Firebase ref1;
     private Firebase ref;
     private ImageView batteryView;
@@ -96,6 +98,9 @@ public class DisplayParameters extends Activity
     Spinner selectedOption;
     String RequiredGraph;
     boolean spinnerEnable = false;
+    String parameterType;
+    String signName;
+    String signRegion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -160,10 +165,11 @@ public class DisplayParameters extends Activity
         graph.getGridLabelRenderer().setHumanRounding(false);
         graph.getGridLabelRenderer().setPadding(50);
 
-        graph.getGridLabelRenderer().setVerticalAxisTitle("Volts");
+
         graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
 //        graph.setTitle("Battery Voltage");
 //        graph.getLegendRenderer().setVisible(true);
+        series.setThickness(10);
         graph.getViewport().setScrollable(true);
         graph.getViewport().setScalable(true);
 
@@ -174,16 +180,23 @@ public class DisplayParameters extends Activity
                 boolean handled = false;
                 if (actionId == EditorInfo.IME_ACTION_SEND) {
                     System.out.println("Enter was pressed");
-                    if (isInteger(graphDataAmount.getText().toString())) {
+
+                    Integer userInput;
+                    try{
+                        userInput = Integer.parseInt(graphDataAmount.getText().toString());
+                    }catch (Exception ex){
+                        userInput = 0;
+                    }
+
+                    if (userInput == 0 || userInput > 50000 || userInput < 0  ){
+                        Toast.makeText(DisplayParameters.this, "Enter a Valid Number", Toast.LENGTH_SHORT).show();// display toast
+                    }else{
                         InputMethodManager imm = (InputMethodManager)getBaseContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(graphDataAmount.getWindowToken(), 0);
                         noOfGraphEntries = graphDataAmount.getText().toString();
-                        System.out.println("noOfGraphEntries12: "+noOfGraphEntries);
+                        System.out.println("noOfGraphEntries12: " + noOfGraphEntries);
                         series.resetData(new DataPoint[]{});
                         updateGraph();
-                    } else {
-                        noOfGraphEntries = "10";
-                        Toast.makeText(DisplayParameters.this, "Enter a Valid Number", Toast.LENGTH_SHORT).show();// display toast
                     }
                     handled = true;
                 }
@@ -223,12 +236,16 @@ public class DisplayParameters extends Activity
         security_switch_text = (TextView) findViewById(R.id.security_switch_view);
         solar_voltage_text = (TextView) findViewById(R.id.solar_voltage_view);
         time_text = (TextView) findViewById(R.id.time_view);
+        signNameTextView = (TextView) findViewById(R.id.sign_name_view);
+        signRegionTextView = (TextView) findViewById(R.id.sign_region_view);
 
-//        battery_voltage_text.setText(Html.fromHtml("<b>Battery Voltage:  </b>"));
-//        load_current_text.setText(Html.fromHtml("<b>Load Current:  </b>"));
-//        security_switch_text.setText(Html.fromHtml("<b>Security Switch:  </b>"));
-//        solar_voltage_text.setText(Html.fromHtml("<b>Solar Voltage:  </b>"));
-//        time_text.setText(Html.fromHtml("<b>Time:  </b>"));
+        signNameTextView.setText(Html.fromHtml("<b>Name:  </b>"));
+        signRegionTextView.setText(Html.fromHtml("<b>Region:  </b>"));
+        battery_voltage_text.setText(Html.fromHtml("<b>Battery:  </b>"));
+        load_current_text.setText(Html.fromHtml("<b>Load Current:  </b>"));
+        security_switch_text.setText(Html.fromHtml("<b>Security Switch:  </b>"));
+        solar_voltage_text.setText(Html.fromHtml("<b>Solar:  </b>"));
+        time_text.setText(Html.fromHtml("<b>Updated @:  </b>"));
 
 
         batteryView = (ImageView) findViewById(R.id.battery_view);
@@ -238,20 +255,37 @@ public class DisplayParameters extends Activity
         queryRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                battery_voltage_text.setText("Battery Voltage: ");
-                load_current_text.setText("Load Current: ");
-                security_switch_text.setText("Security Switch: ");
-                solar_voltage_text.setText("Solar Voltage: ");
-                time_text.setText("Time: ");
+//                battery_voltage_text.setText("Battery Voltage: ");
+//                load_current_text.setText("Load Current: ");
+//                security_switch_text.setText("Security Switch: ");
+//                solar_voltage_text.setText("Solar Voltage: ");
+//                time_text.setText("Time: ");
                 parametersLocation = "https://bottling-station-firebase.firebaseio.com/locations/";
                 System.out.println("snapshots ");
                 System.out.println("xxabcdDisplayParam" + snapshot.getValue().toString());
                 signLocationFromDB = (Map<Object, Object>) snapshot.getValue();
+
                 System.out.println("xxxxxxcoordvalue " + signLocationFromDB);
                 for (Map.Entry<Object, Object> entry : signLocationFromDB.entrySet()) {
                     String key = entry.getKey().toString();
-                    String value = entry.getValue().toString();
+                    Map<Object, Object> nameRegion = (Map<Object, Object>) entry.getValue();
+                    System.out.println("value1234nameRegion " + nameRegion);
+                    System.out.println("value1234 " + nameRegion.get("name"));
+                    try{
+                        signName = nameRegion.get("name").toString();
+                    }catch (Exception ex){
+                        signName = null;
+                        System.out.println(ex);
+                    }
+
+                    try{
+                        signRegion = nameRegion.get("region").toString();
+                    }catch (Exception ex){
+                        signRegion = null;
+                        System.out.println(ex);
+                    }
                     // do stuff
+
                     System.out.println("xxxxxxcoordvaluekey " + key);
                     parametersLocation = parametersLocation.concat(key);
                     System.out.println("xxxxxxcoordvalueQuery " + parametersLocation);
@@ -297,10 +331,17 @@ public class DisplayParameters extends Activity
                         bhalfsize = Bitmap.createScaledBitmap(largeIcon, largeIcon.getWidth() / 1, largeIcon.getHeight() / 1, false);
                         batteryView.setImageBitmap(bhalfsize);
 //                        battery_voltage_text.append(Html.fromHtml("<p>" + voltageMap.get("battery_voltage").toString() + "</p>"));
-                       battery_voltage_text.append("  " + voltageMap.get("battery_voltage").toString());
-                        load_current_text.append("  " + voltageMap.get("load_current").toString());
-                        security_switch_text.append("  " + voltageMap.get("security_switch").toString());
-                        solar_voltage_text.append("  " + voltageMap.get("solar_voltage").toString());
+
+
+//                        battery_voltage_text.append(Html.fromHtml("<font color=#cc0029>" +voltageMap.get("battery_voltage").toString()+" Volts</font>"));
+
+
+                        battery_voltage_text.append(" " + voltageMap.get("battery_voltage").toString()+" Volts");
+                        load_current_text.append(" " + voltageMap.get("load_current").toString()+" Amps");
+                        security_switch_text.append(" " + voltageMap.get("security_switch").toString());
+                        solar_voltage_text.append(" " + voltageMap.get("solar_voltage").toString()+" Volts");
+                        signNameTextView.append(" "+ signName);
+                        signRegionTextView.append(" "+ signRegion);
                         Date formattedTime = null;
                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss"); // MM/dd/yyyy HH:mm:ss
                         try {
@@ -437,13 +478,23 @@ public class DisplayParameters extends Activity
                 System.out.println("snapshots ");
                 System.out.println("xxabcdsnapshotCUrrent" + nextSnapshot.getValue().toString());
                 Map<Object, Object> voltageMap1 = (Map<Object, Object>) nextSnapshot.getValue();
-                String parameterType;
+
                 switch (RequiredGraph){
-                    case "Battery Voltage": parameterType = "battery_voltage"; break;
-                    case "Solar Voltage": parameterType = "solar_voltage"; break;
-                    case "Load Current": parameterType = "load_current"; break;
-                    case "Security Switch": parameterType = "security_switch"; break;
-                    default: parameterType = "battery_voltage"; break;
+                    case "Battery Voltage": parameterType = "battery_voltage";
+                                            graph.getGridLabelRenderer().setVerticalAxisTitle("Volts");
+                                            break;
+                    case "Solar Voltage": parameterType = "solar_voltage";
+                                             graph.getGridLabelRenderer().setVerticalAxisTitle("Volts");
+                                            break;
+                    case "Load Current": parameterType = "load_current";
+                                        graph.getGridLabelRenderer().setVerticalAxisTitle("Amps");
+                                         break;
+                    case "Security Switch": parameterType = "security_switch";
+                                         graph.getGridLabelRenderer().setVerticalAxisTitle("ON/OFF");
+                                        break;
+                    default: parameterType = "battery_voltage";
+                                        graph.getGridLabelRenderer().setVerticalAxisTitle("Volts");
+                                        break;
 
                 }
                 System.out.println("asdfgBatteryVoltage" + voltageMap1.get(parameterType).toString());
@@ -507,7 +558,24 @@ public class DisplayParameters extends Activity
                 String toastVoltage = String.format("%.2f ", voltageDataPoint);
 
                 System.out.println("dataPointVoltage: " + toastVoltage);
-                Toast.makeText(DisplayParameters.this, "Captured @: " + formattedDate + "\n " + " Battery Voltage: " + toastVoltage + " Volts", Toast.LENGTH_SHORT).show();
+
+                switch(parameterType){
+                    case "battery_voltage":
+                        Toast.makeText(DisplayParameters.this, "Captured @: " + formattedDate + "\n " + " Battery Voltage: " + toastVoltage + " Volts", Toast.LENGTH_SHORT).show();
+                        break;
+                    case "solar_voltage":
+                        Toast.makeText(DisplayParameters.this, "Captured @: " + formattedDate + "\n " + " Solar Voltage: " + toastVoltage + " Volts", Toast.LENGTH_SHORT).show();
+                        break;
+                    case "load_current":
+                        Toast.makeText(DisplayParameters.this, "Captured @: " + formattedDate + "\n " + " Load Current: " + toastVoltage + " Amps", Toast.LENGTH_SHORT).show();
+                        break;
+                    case "security_switch":
+                        Toast.makeText(DisplayParameters.this, "Captured @: " + formattedDate + "\n " + " Security Switch: " + toastVoltage , Toast.LENGTH_SHORT).show();
+                        break;
+                    default:
+                        Toast.makeText(DisplayParameters.this, "Captured @: " + formattedDate + "\n " + " Battery Voltage: " + toastVoltage + " Volts", Toast.LENGTH_SHORT).show();
+                        break;
+                }
             }
         });
 
