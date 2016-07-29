@@ -81,7 +81,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Security Switch: "
+        android:text="Tamper Switch: "
         android:layout_marginTop="5dp"
         android:id="@+id/security_switch_view"
         android:layout_below="@+id/load_current_view"
