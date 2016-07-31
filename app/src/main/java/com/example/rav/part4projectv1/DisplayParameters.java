@@ -117,6 +117,7 @@ public class DisplayParameters extends Activity
     Paint paint;
     boolean thresholdLineNeeded = false;
     BarGraphSeries<DataPoint> seriesBar;
+    Toast toastShow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -140,7 +141,7 @@ public class DisplayParameters extends Activity
                 // your code here
                 RequiredGraph = selectedOption.getSelectedItem().toString();
                 System.out.println("RequiredGraph: " + RequiredGraph);
-                if (spinnerEnable){
+                if (spinnerEnable) {
                     series.resetData(new DataPoint[]{});
                     seriesGreen.resetData(new DataPoint[]{});
                     seriesYellow.resetData(new DataPoint[]{});
@@ -230,7 +231,10 @@ public class DisplayParameters extends Activity
                     }
 
                     if (userInput == 0 || userInput > 50000 || userInput < 0  ){
-                        Toast.makeText(DisplayParameters.this, "Enter a Valid Number", Toast.LENGTH_SHORT).show();// display toast
+
+                            showToast("Enter a Valid Number");
+
+
                     }else{
                         InputMethodManager imm = (InputMethodManager)getBaseContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(graphDataAmount.getWindowToken(), 0);
@@ -605,6 +609,7 @@ public class DisplayParameters extends Activity
 //                calendar.add(Calendar.DATE, 1);
 //                Date d10 = calendar.getTime();
 //                System.out.println("absd3 " + d10);
+                graph.getViewport().setYAxisBoundsManual(false);
                 switch (RequiredGraph){
                     case "Battery Voltage":
                         seriesRed.appendData(new DataPoint(datePoint, 12.0), true, 100);
@@ -615,12 +620,12 @@ public class DisplayParameters extends Activity
                         seriesYellow.setColor(Color.YELLOW);
                         seriesGreen.setColor(Color.GREEN);
                         seriesBar.resetData(new DataPoint[]{});
-                        series.setColor(Color.rgb(30,144,255));
+                        series.setColor(Color.rgb(30, 144, 255));
                         graph.getGridLabelRenderer().setVerticalAxisTitle("Volts");
                         series.appendData(new DataPoint(datePoint, voltageValues), true, 100);
                         break;
                     case "Solar Voltage":
-                        series.setColor(Color.rgb(30,144,255));
+                        series.setColor(Color.rgb(30, 144, 255));
                         graph.getGridLabelRenderer().setVerticalLabelsVisible(true);
                         seriesYellow.resetData(new DataPoint[]{});
                         seriesRed.resetData(new DataPoint[]{});
@@ -630,7 +635,7 @@ public class DisplayParameters extends Activity
                         graph.getGridLabelRenderer().setVerticalAxisTitle("Volts");
                         break;
                     case "Load Current":
-                        series.setColor(Color.rgb(30,144,255));
+                        series.setColor(Color.rgb(30, 144, 255));
                         graph.getGridLabelRenderer().setVerticalLabelsVisible(true);
                         seriesYellow.resetData(new DataPoint[]{});
                         seriesRed.resetData(new DataPoint[]{});
@@ -640,6 +645,9 @@ public class DisplayParameters extends Activity
                         series.appendData(new DataPoint(datePoint, voltageValues), true, 100);
                         break;
                     case "Security Switch":
+                        graph.getViewport().setMinY(0);
+                        graph.getViewport().setMaxY(7);
+                        graph.getViewport().setYAxisBoundsManual(true);
                         seriesRed.appendData(new DataPoint(datePoint, 5), true, 100);
                         seriesGreen.appendData(new DataPoint(datePoint,5), true, 100);
                         seriesYellow.appendData(new DataPoint(datePoint, 5), true, 100);
@@ -654,7 +662,7 @@ public class DisplayParameters extends Activity
                         graph.getGridLabelRenderer().setVerticalAxisTitle("ON/OFF");
                         break;
                     default:
-                        series.setColor(Color.rgb(30,144,255));
+                        series.setColor(Color.rgb(30, 144, 255));
                         graph.getGridLabelRenderer().setVerticalLabelsVisible(true);
                         seriesRed.appendData(new DataPoint(datePoint, 12.0), true, 100);
                         seriesGreen.appendData(new DataPoint(datePoint, 13.0), true, 100);
@@ -726,9 +734,8 @@ public class DisplayParameters extends Activity
                 SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss"); // the format of your date
                 sdf.setTimeZone(TimeZone.getTimeZone("GMT+12:00")); // give a timezone reference for formating (see comment at the bottom
                 String formattedDate = sdf.format(dateClicked);
+                showToast("Captured @: " + formattedDate);
 
-
-                Toast.makeText(DisplayParameters.this, "Captured @: " + formattedDate, Toast.LENGTH_SHORT).show();
             }
         });
         series.setOnDataPointTapListener(new OnDataPointTapListener() {
@@ -750,23 +757,50 @@ public class DisplayParameters extends Activity
 
                 switch (parameterType) {
                     case "battery_voltage":
-                        Toast.makeText(DisplayParameters.this, "Captured @: " + formattedDate + "\n " + " Battery Voltage: " + toastVoltage + " Volts", Toast.LENGTH_SHORT).show();
+                            showToast("Captured @: " + formattedDate + "\n " + " Battery Voltage: " + toastVoltage + " Volts");
                         break;
                     case "solar_voltage":
-                        Toast.makeText(DisplayParameters.this, "Captured @: " + formattedDate + "\n " + " Solar Voltage: " + toastVoltage + " Volts", Toast.LENGTH_SHORT).show();
+                            showToast("Captured @: " + formattedDate + "\n " + " Solar Voltage: " + toastVoltage + " Volts");
                         break;
                     case "load_current":
-                        Toast.makeText(DisplayParameters.this, "Captured @: " + formattedDate + "\n " + " Load Current: " + toastVoltage + " Amps", Toast.LENGTH_SHORT).show();
+                        showToast("Captured @: " + formattedDate + "\n " + " Load Current: " + toastVoltage + " Amps");
                         break;
                     case "security_switch":
-                        Toast.makeText(DisplayParameters.this, "Captured @: " + formattedDate, Toast.LENGTH_SHORT).show();
+                        showToast("Captured @: " + formattedDate);
                         break;
                     default:
-                        Toast.makeText(DisplayParameters.this, "Captured @: " + formattedDate + "\n " + " Battery Voltage: " + toastVoltage + " Volts", Toast.LENGTH_SHORT).show();
+                            showToast("Captured @: " + formattedDate + "\n " + " Battery Voltage: " + toastVoltage + " Volts");
+
                         break;
                 }
             }
         });
+
+    }
+    public void showToast(String msg) {
+
+        //here is checking whether toast object is null or not;if not null gonna cancel the toast that is showing in phone window and make it null;
+
+        if(toastShow!=null)
+        {
+
+            toastShow.cancel();
+
+            toastShow=null;
+        }
+
+        //if toast object is null,gonna create new instance and make it shown on phone window.
+
+        if(toastShow==null)
+        {
+
+            toastShow=Toast.makeText(DisplayParameters.this,msg,Toast.LENGTH_SHORT);
+
+
+
+            toastShow.show();
+
+        }
 
     }
 }

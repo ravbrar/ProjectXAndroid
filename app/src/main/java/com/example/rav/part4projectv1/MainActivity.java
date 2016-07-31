@@ -1,6 +1,8 @@
 package com.example.rav.part4projectv1;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
@@ -37,7 +39,7 @@ import java.util.Random;
 public class MainActivity extends Activity {
     private Button fetchButton;
 
-
+    private String Help;
 
 
 
@@ -48,7 +50,11 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Help =  "1. New users Sign up using your email and password.\n"+
+                "    Existing users Log in using your credentials.\n" +
+                "2. Click on the sign you're interested in.\n"+
+                "3. View Parameters using graph.\n" +
+                "    Tap on graph points to view more information.";
         fetchButton = (Button) findViewById(R.id.fetch_button);
 
 
@@ -78,11 +84,27 @@ public class MainActivity extends Activity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+    public void alert(){
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage(Help);
 
+        alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+//                Toast.makeText(MainActivity.this,"You clicked yes button",Toast.LENGTH_LONG).show();
+            }
+        });
+
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+            System.out.println("Help clicked");
+            alert();
             return true;
         }
 
