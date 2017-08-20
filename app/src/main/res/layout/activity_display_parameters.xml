@@ -14,7 +14,15 @@
         android:layout_marginTop="52dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true" />
-
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:progressDrawable="@drawable/circular_progress_bar"
+        android:layout_marginTop="27dp"
+        android:layout_below="@+id/parameters_select"
+        android:layout_centerHorizontal="true" />
 
     <Spinner
         android:id="@+id/parameters_select"

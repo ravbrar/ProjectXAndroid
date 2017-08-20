@@ -36,7 +36,7 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/harding_logo"
+        android:src="@drawable/nzta_logo"
         android:id="@+id/imageView"
         android:layout_marginTop="425dp"
         android:layout_alignParentTop="true"
@@ -54,7 +54,7 @@
         android:id="@+id/username"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="xyz@hardingtraffic.co.nz"
+        android:hint="xyz@nzta.govt.nz"
         android:inputType="textEmailAddress"
         android:layout_below="@+id/welcomeImageView"
         android:layout_toEndOf="@+id/linetext" />

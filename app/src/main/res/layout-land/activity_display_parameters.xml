@@ -13,16 +13,23 @@
         android:id="@+id/graph_display_parameters"
         android:layout_below="@+id/sign_name_view"
         android:layout_alignParentStart="true" />
-
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:progressDrawable="@drawable/circular_progress_bar"
+        android:layout_below="@+id/parameters_select"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="27dp" />
     <Spinner
         android:id="@+id/parameters_select"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="300dp"
+        android:layout_height="30dp"
         style="@style/spinner_style"
-
-        android:layout_alignTop="@+id/sign_name_view"
-        android:layout_toEndOf="@+id/security_switch_view"
-        android:layout_marginStart="71dp" />
+        android:paddingTop="0dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true" />
     <Button
         android:id="@+id/full_screen"
         android:text="Full Screen"

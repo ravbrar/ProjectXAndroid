@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">EWS Manager</string>
+    <string name="app_name">Asset Manager</string>
 
     <string name="hello_world"></string>
     <string name="fetch_button_name">Log In</string>

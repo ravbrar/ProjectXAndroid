@@ -13,6 +13,7 @@ package com.example.rav.part4projectv1;
         import android.graphics.Point;
         import android.graphics.Typeface;
         import android.os.Bundle;
+        import android.os.CountDownTimer;
         import android.os.Message;
         import android.renderscript.Sampler;
         import android.telephony.SmsManager;
@@ -34,6 +35,7 @@ package com.example.rav.part4projectv1;
         import android.widget.Button;
         import android.widget.EditText;
         import android.widget.ImageView;
+        import android.widget.ProgressBar;
         import android.widget.Spinner;
         import android.widget.Switch;
         import android.widget.TextView;
@@ -118,6 +120,10 @@ public class DisplayParameters extends Activity
     boolean thresholdLineNeeded = false;
     BarGraphSeries<DataPoint> seriesBar;
     Toast toastShow;
+    private ProgressBar spinner;
+    Integer graphEntriesCount;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -133,8 +139,9 @@ public class DisplayParameters extends Activity
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 // Apply the adapter to the spinner
         selectedOption.setAdapter(adapter);
-
-
+        spinner=(ProgressBar)findViewById(R.id.progressBar);
+        spinner.setVisibility(View.GONE);
+        spinner.bringToFront();
         selectedOption.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
@@ -142,13 +149,32 @@ public class DisplayParameters extends Activity
                 RequiredGraph = selectedOption.getSelectedItem().toString();
                 System.out.println("RequiredGraph: " + RequiredGraph);
                 if (spinnerEnable) {
+//                    spinner.setVisibility(View.VISIBLE);
                     series.resetData(new DataPoint[]{});
                     seriesGreen.resetData(new DataPoint[]{});
                     seriesYellow.resetData(new DataPoint[]{});
                     seriesRed.resetData(new DataPoint[]{});
                     seriesBar.resetData(new DataPoint[]{});
 //                    seriesPoint.resetData(new DataPoint[]{});
-                    updateGraph();
+//                    thisTime.valueOf(0);
+//                    previousTime.valueOf(0);
+
+                    new CountDownTimer(2000, 1000) {
+
+                        public void onTick(long millisUntilFinished) {
+                            System.out.println("seconds remaining: " + millisUntilFinished / 1000);
+                        }
+
+                        public void onFinish() {
+
+
+
+                            updateGraph();
+                            System.out.println("done!");
+
+                        }
+                    }.start();
+
                 }
 
             }
@@ -190,9 +216,9 @@ public class DisplayParameters extends Activity
 
         graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(DisplayParameters.this));
 
-        // graph.getGridLabelRenderer().setNumHorizontalLabels(3);
+//         graph.getGridLabelRenderer().setNumHorizontalLabels(3);
         graph.getViewport().setMinX(0);
-        graph.getViewport().setMaxX(146000);
+        graph.getViewport().setMaxX(1470000000);
         graph.getViewport().setXAxisBoundsManual(true);
         graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);
         series.setDataPointsRadius(15);
@@ -208,14 +234,14 @@ public class DisplayParameters extends Activity
 //        graph.getLegendRenderer().setVisible(true);
 
         series.setThickness(10);
-        seriesRed.setThickness(2);
-        seriesGreen.setThickness(2);
-        seriesYellow.setThickness(2);
+        seriesRed.setThickness(5);
+        seriesGreen.setThickness(5);
+        seriesYellow.setThickness(5);
         graph.getViewport().setScrollable(true);
         graph.getViewport().setScalable(true);
         graph.getViewport().scrollToEnd();
 
-
+//        graph.setBackgroundColor(Color.rgb(0, 191, 255));
         graphDataAmount.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -224,28 +250,44 @@ public class DisplayParameters extends Activity
                     System.out.println("Enter was pressed");
 
                     Integer userInput;
-                    try{
+                    try {
                         userInput = Integer.parseInt(graphDataAmount.getText().toString());
-                    }catch (Exception ex){
+                    } catch (Exception ex) {
                         userInput = 0;
                     }
 
-                    if (userInput == 0 || userInput > 50000 || userInput < 0  ){
+                    if (userInput == 0 || userInput > 50000 || userInput < 0) {
 
-                            showToast("Enter a Valid Number");
+                        showToast("Enter a Valid Number");
 
 
-                    }else{
-                        InputMethodManager imm = (InputMethodManager)getBaseContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    } else {
+                        InputMethodManager imm = (InputMethodManager) getBaseContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(graphDataAmount.getWindowToken(), 0);
                         noOfGraphEntries = graphDataAmount.getText().toString();
                         System.out.println("noOfGraphEntries12: " + noOfGraphEntries);
+//                        spinner.setVisibility(View.VISIBLE);
                         series.resetData(new DataPoint[]{});
                         seriesRed.resetData(new DataPoint[]{});
                         seriesGreen.resetData(new DataPoint[]{});
                         seriesYellow.resetData(new DataPoint[]{});
                         seriesBar.resetData(new DataPoint[]{});
-                        updateGraph();
+
+                        new CountDownTimer(2000, 1000) {
+
+                            public void onTick(long millisUntilFinished) {
+                                System.out.println("seconds remaining: " + millisUntilFinished / 1000);
+                            }
+
+                            public void onFinish() {
+
+
+                                updateGraph();
+                                System.out.println("done!");
+
+                            }
+                        }.start();
+
                     }
                     handled = true;
                 }
@@ -268,17 +310,21 @@ public class DisplayParameters extends Activity
             Bundle extras = getIntent().getExtras();
             if(extras == null) {
                 SignCoordinates= null;
+//                noOfGraphEntries = null;
             } else {
                 SignCoordinates= extras.getString("SignCoordinates");
+//                noOfGraphEntries= extras.getString("noOfGraphEntries");
             }
         } else {
             //SignCoordinates= (String) savedInstanceState.getSerializable("SignCoordinates");
 
             CharSequence savedText = savedInstanceState.getCharSequence("sign_coordinates_value");
             SignCoordinates = savedText.toString();
+//            CharSequence savedGraphEntrierNo = savedInstanceState.getCharSequence("noOfGraphEntries");
+//            noOfGraphEntries = savedGraphEntrierNo.toString();
         }
-        System.out.println("SignCoordinates "  + SignCoordinates);//PrbolemHereWHenComingBckFromGraphPlotter
-
+        System.out.println("SignCoordinatesab " + SignCoordinates);//PrbolemHereWHenComingBckFromGraphPlotter
+        System.out.println("SignCoordinatesabnoOfGraphEntries " + noOfGraphEntries);
         batteryView = (ImageView) findViewById(R.id.battery_view);
         battery_voltage_text = (TextView) findViewById(R.id.battery_voltage_view);
         load_current_text = (TextView) findViewById(R.id.load_current_view);
@@ -295,6 +341,15 @@ public class DisplayParameters extends Activity
         security_switch_text.setText(Html.fromHtml("<b>Tamper Switch:  </b>"));
         solar_voltage_text.setText(Html.fromHtml("<b>Solar:  </b>"));
         time_text.setText(Html.fromHtml("<b>Updated @:  </b>"));
+
+//        signNameTextView.setBackgroundColor(Color.rgb(0, 255, 0));
+//        signRegionTextView.setBackgroundColor(Color.rgb(0,255,0));
+//        battery_voltage_text.setBackgroundColor(Color.rgb(255,255,51));
+//        load_current_text.setBackgroundColor(Color.rgb(0,255,0));
+//        security_switch_text.setBackgroundColor(Color.rgb(0,255,0));
+//        solar_voltage_text.setBackgroundColor(Color.rgb(186,85,211));
+//        time_text.setBackgroundColor(Color.rgb(0,255,0));
+
 
 
         batteryView = (ImageView) findViewById(R.id.battery_view);
@@ -403,9 +458,16 @@ public class DisplayParameters extends Activity
                         signNameTextView.append(" " + signName);
                         signRegionTextView.append(" " + signRegion);
                         Date formattedTime = null;
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss"); // MM/dd/yyyy HH:mm:ss
+//                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss"); // previous format
+                        System.out.println("voltageMap.gettime : " + voltageMap.get("time").toString());
+                        String sampleTime = voltageMap.get("time").toString();
+                        String sampleTime1 = sampleTime.replaceAll("-", ":");
+                        String sampleTime2 = sampleTime1.replaceAll("T", ":");
+                        String correctTime = sampleTime2.split("\\+")[0];
+                        System.out.println("correctTime : " + correctTime);
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss");
                         try {
-                            formattedTime = simpleDateFormat.parse(voltageMap.get("time").toString());
+                            formattedTime = simpleDateFormat.parse(correctTime);
                             // System.out.println("date : "+simpleDateFormat.format(d5));
                         } catch (ParseException ex) {
                             System.out.println("Exception " + ex);
@@ -413,7 +475,7 @@ public class DisplayParameters extends Activity
 
 
                         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy   HH:mm:ss"); // the format of your date
-                        sdf.setTimeZone(TimeZone.getTimeZone("GMT+12:00")); // give a timezone reference for formating (see comment at the bottom
+//                        sdf.setTimeZone(TimeZone.getTimeZone("GMT+12:00")); // give a timezone reference for formating (see comment at the bottom
                         String formattedDate = sdf.format(formattedTime);
                         System.out.println("Recent Time: " + formattedDate);
 
@@ -425,6 +487,7 @@ public class DisplayParameters extends Activity
                             noOfGraphEntries = "1";
                         }
                         spinnerEnable = true;
+
                         updateGraph();
 
 
@@ -445,10 +508,7 @@ public class DisplayParameters extends Activity
             }
 
         });
-//        if (graphToExecute == true){
-//            updateGraph();
-//        }
-//    updateGraph();
+
     }
 
 
@@ -475,6 +535,8 @@ public class DisplayParameters extends Activity
     protected void onSaveInstanceState (Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putCharSequence("sign_coordinates_value", SignCoordinates);
+
+//        outState.putCharSequence("noOfGraphEntries", noOfGraphEntries);
     }
 //    @Override
 //    public void onRestart(){
@@ -527,13 +589,20 @@ public class DisplayParameters extends Activity
         if (noOfGraphEntries == null){
             noOfGraphEntries = "10";
         }
-
+        graphEntriesCount = 0;
         System.out.println("noOfGraphEntries:  " + noOfGraphEntries.toString());
 
         Query queryRef1 = ref1.orderByChild("time").limitToLast(Integer.parseInt(noOfGraphEntries));
         queryRef1.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot nextSnapshot, String s) {
+                graphEntriesCount++;
+
+                System.out.println("graphEntriesCount: " + graphEntriesCount);
+                System.out.println("graphEntriesCount CHildren: " +  nextSnapshot.getChildrenCount());
+//                if (graphEntriesCount == 400){
+//                    spinner.setVisibility(View.GONE);
+//                }
                 System.out.println("xxabcdsnapshotCUrrent new" + nextSnapshot.getValue().toString());
                 System.out.println("snapshots ");
                 System.out.println("xxabcdsnapshotCUrrent" + nextSnapshot.getValue().toString());
@@ -596,33 +665,35 @@ public class DisplayParameters extends Activity
 //                        System.out.println("asdfgsolar_voltage" + voltageMap.get("solar_voltage").toString());
 //                        System.out.println("asdfgtime" + voltageMap.get("time").toString());
 
-                voltageTimes = voltageMap1.get("time").toString();
+
+                String sampleTime = voltageMap1.get("time").toString();
+                String sampleTime1 = sampleTime.replaceAll("-", ":");
+                String sampleTime2 = sampleTime1.replaceAll("T", ":");
+                String correctTime = sampleTime2.split("\\+")[0];
+                System.out.println("correctTime : " + correctTime);
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss"); // MM/dd/yyyy HH:mm:ss
                 try {
-                    datePoint = simpleDateFormat.parse(voltageTimes);
+                    datePoint = simpleDateFormat.parse(correctTime);
                     // System.out.println("date : "+simpleDateFormat.format(d5));
                 } catch (ParseException ex) {
                     System.out.println("Exception " + ex);
                 }
-                System.out.println("absdatePoint:  " + datePoint);
+
                 System.out.println("absvoltageValues " + voltageValues);
-//                calendar.add(Calendar.DATE, 1);
-//                Date d10 = calendar.getTime();
-//                System.out.println("absd3 " + d10);
                 graph.getViewport().setYAxisBoundsManual(false);
                 switch (RequiredGraph){
                     case "Battery Voltage":
-                        seriesRed.appendData(new DataPoint(datePoint, 12.0), true, 100);
+                        seriesRed.appendData(new DataPoint(datePoint, 12.0), true, 10000);
                         graph.getGridLabelRenderer().setVerticalLabelsVisible(true);
-                        seriesGreen.appendData(new DataPoint(datePoint, 13.0), true, 100);
-                        seriesYellow.appendData(new DataPoint(datePoint, 12.5), true, 100);
+                        seriesGreen.appendData(new DataPoint(datePoint, 13.0), true, 10000);
+                        seriesYellow.appendData(new DataPoint(datePoint, 12.5), true, 10000);
                         seriesRed.setColor(Color.RED);
                         seriesYellow.setColor(Color.YELLOW);
                         seriesGreen.setColor(Color.GREEN);
                         seriesBar.resetData(new DataPoint[]{});
                         series.setColor(Color.rgb(30, 144, 255));
                         graph.getGridLabelRenderer().setVerticalAxisTitle("Volts");
-                        series.appendData(new DataPoint(datePoint, voltageValues), true, 100);
+                        series.appendData(new DataPoint(datePoint, voltageValues), true, 10000);
                         break;
                     case "Solar Voltage":
                         series.setColor(Color.rgb(30, 144, 255));
@@ -631,7 +702,7 @@ public class DisplayParameters extends Activity
                         seriesRed.resetData(new DataPoint[]{});
                         seriesGreen.resetData(new DataPoint[]{});
                         seriesBar.resetData(new DataPoint[]{});
-                        series.appendData(new DataPoint(datePoint, voltageValues), true, 100);
+                        series.appendData(new DataPoint(datePoint, voltageValues), true, 10000);
                         graph.getGridLabelRenderer().setVerticalAxisTitle("Volts");
                         break;
                     case "Load Current":
@@ -642,37 +713,37 @@ public class DisplayParameters extends Activity
                         seriesGreen.resetData(new DataPoint[]{});
                         seriesBar.resetData(new DataPoint[]{});
                         graph.getGridLabelRenderer().setVerticalAxisTitle("Amps");
-                        series.appendData(new DataPoint(datePoint, voltageValues), true, 100);
+                        series.appendData(new DataPoint(datePoint, voltageValues), true, 10000);
                         break;
                     case "Security Switch":
                         graph.getViewport().setMinY(0);
                         graph.getViewport().setMaxY(7);
                         graph.getViewport().setYAxisBoundsManual(true);
-                        seriesRed.appendData(new DataPoint(datePoint, 5), true, 100);
-                        seriesGreen.appendData(new DataPoint(datePoint,5), true, 100);
-                        seriesYellow.appendData(new DataPoint(datePoint, 5), true, 100);
+                        seriesRed.appendData(new DataPoint(datePoint, 5), true, 10000);
+                        seriesGreen.appendData(new DataPoint(datePoint,5), true, 10000);
+                        seriesYellow.appendData(new DataPoint(datePoint, 5), true, 10000);
                         seriesRed.setColor(Color.TRANSPARENT);
                         seriesYellow.setColor(Color.TRANSPARENT);
                         seriesGreen.setColor(Color.TRANSPARENT);
                         seriesBar.setColor(Color.rgb(220, 20, 60));
-                        seriesBar.appendData(new DataPoint(datePoint, voltageValues), true, 100);
+                        seriesBar.appendData(new DataPoint(datePoint, voltageValues), true, 10000);
                         graph.getGridLabelRenderer().setVerticalLabelsVisible(false);
                         series.setColor(Color.TRANSPARENT);
-                        series.appendData(new DataPoint(datePoint, voltageValues), true, 100);
+                        series.appendData(new DataPoint(datePoint, voltageValues), true, 10000);
                         graph.getGridLabelRenderer().setVerticalAxisTitle("ON/OFF");
                         break;
                     default:
                         series.setColor(Color.rgb(30, 144, 255));
                         graph.getGridLabelRenderer().setVerticalLabelsVisible(true);
-                        seriesRed.appendData(new DataPoint(datePoint, 12.0), true, 100);
-                        seriesGreen.appendData(new DataPoint(datePoint, 13.0), true, 100);
-                        seriesYellow.appendData(new DataPoint(datePoint, 12.5), true, 100);
+                        seriesRed.appendData(new DataPoint(datePoint, 12.0), true, 10000);
+                        seriesGreen.appendData(new DataPoint(datePoint, 13.0), true, 10000);
+                        seriesYellow.appendData(new DataPoint(datePoint, 12.5), true, 10000);
                         seriesRed.setColor(Color.RED);
                         seriesYellow.setColor(Color.YELLOW);
                         seriesGreen.setColor(Color.GREEN);
                         seriesBar.resetData(new DataPoint[]{});
                         graph.getGridLabelRenderer().setVerticalAxisTitle("Volts");
-                        series.appendData(new DataPoint(datePoint, voltageValues), true, 100);
+                        series.appendData(new DataPoint(datePoint, voltageValues), true, 10000);
                         break;
                 }
 //                if(thresholdLineNeeded){
@@ -718,7 +789,6 @@ public class DisplayParameters extends Activity
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
             }
-
             @Override
             public void onCancelled(FirebaseError firebaseError) {
                 System.out.println("firebaseError" + firebaseError);
